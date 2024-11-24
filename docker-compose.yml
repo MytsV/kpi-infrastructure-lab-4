@@ -1,4 +1,33 @@
 services:
+  mongo_db:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27018:27017"
+
+  nosql_app:
+    build: ./lab4_nosql
+    container_name: nosql
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_DEBUG=${DJANGO_DEBUG}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+    ports:
+      - "8001:8000"
+    depends_on:
+      - mongo_db
+    command: python manage.py runserver 0.0.0.0:8000
+
   sql_db:
     image: postgres
     container_name: postgres_db
@@ -12,7 +41,7 @@ services:
       timeout: 5s
       retries: 15
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -32,4 +61,5 @@ services:
       DATABASE_URL: postgres://postgres:postgres@db:5432/lab4_sql
 
 volumes:
-  postgres_data: null
+  postgres_data:
+  mongo_data:
