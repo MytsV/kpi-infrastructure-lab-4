@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "lab4_sql",
+    "lab4_sql_app",
     "django.contrib.postgres",
 ]
 
