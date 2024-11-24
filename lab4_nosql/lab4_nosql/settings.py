@@ -80,11 +80,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': config('DB_NAME'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT', cast=int),
-        'USER': config('DB_USER', default=''),
-        'PASSWORD': config('DB_PASSWORD', default=''),
-        'AUTH_SOURCE': config('DB_AUTH_SOURCE', default=''),
+        'CLIENT': {
+            'host': f"mongodb://{config('DB_USER')}:{config('DB_PASSWORD')}@{config('DB_HOST')}:{config('DB_PORT')}/{config('DB_NAME')}",
+            'authSource': config('DB_AUTH_SOURCE', default='admin'),
+            'uuidRepresentation': 'standard',
+        }
     }
 }
 
