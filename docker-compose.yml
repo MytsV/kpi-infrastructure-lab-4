@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  mongo:
+  mongo_db:
     image: mongo:latest
     container_name: mongo
     environment:
@@ -9,13 +7,11 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
       - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
     volumes:
-      - mongo_db:/data/db
+      - mongo_data:/data/db
     ports:
       - "27018:27017"
-    networks:
-      - app_network
 
-  nosql:
+  nosql_app:
     build: ./lab4_nosql
     container_name: nosql
     environment:
@@ -27,16 +23,43 @@ services:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
     ports:
-      - "8000:8000"
+      - "8001:8000"
     depends_on:
-      - mongo
-    networks:
-      - app_network
+      - mongo_db
     command: python manage.py runserver 0.0.0.0:8000
 
-networks:
-  app_network:
-    driver: bridge
+  sql_db:
+    image: postgres
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lab4_sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  sql_app:
+    build:
+      context: lab4_sql
+    container_name: sql_app
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./lab4_sql:/usr/src/lab4_sql
+    ports:
+      - "8000:8000"
+    depends_on:
+      sql_db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/lab4_sql
 
 volumes:
-  mongo_db:
+  postgres_data:
+  mongo_data:
