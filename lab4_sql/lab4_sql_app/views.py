@@ -6,17 +6,17 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Product, Order, Client
-from .serializers import serializers
+from .serializers import ClientSerializer, ClientUpdateSerializer, ProductSerializer, ProductUpdateSerializer, OrderSerializer, OrderUpdateSerializer
 
 # Create your views here.
 class ClientList(APIView):
     def get(self, request):
         clients = Client.objects.all()
-        serializer = serializers.ClientSerializer(clients, many=True)
+        serializer = ClientSerializer(clients, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = serializers.ClientSerializer(data=request.data)
+        serializer = ClientSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -31,12 +31,12 @@ class ClientDetail(APIView):
 
     def get(self, request, id):
         client = self.get_client(id)
-        serializer = serializers.ClientSerializer(client)
+        serializer = ClientSerializer(client)
         return Response(serializer.data)
 
     def put(self, request, id):
         client = self.get_client(id)
-        serializer = serializers.ClientUpdateSerializer(client, data=request.data)
+        serializer = ClientUpdateSerializer(client, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -51,11 +51,11 @@ class ClientDetail(APIView):
 class ProductList(APIView):
     def get(self, request):
         products = Product.objects.all()
-        serializer = serializers.ProductSerializer(products, many=True)
+        serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = serializers.ProductSerializer(data=request.data)
+        serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -70,12 +70,12 @@ class ProductDetail(APIView):
 
     def get(self, request, id):
         product = self.get_product(id)
-        serializer = serializers.ProductSerializer(product)
+        serializer = ProductSerializer(product)
         return Response(serializer.data)
 
     def put(self, request, id):
         product = self.get_product(id)
-        serializer = serializers.ProductUpdateSerializer(product, data=request.data)
+        serializer = ProductUpdateSerializer(product, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -90,11 +90,11 @@ class ProductDetail(APIView):
 class OrderList(APIView):
     def get(self, request):
         orders = Order.objects.all()
-        serializer = serializers.OrderSerializer(orders, many=True)
+        serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = serializers.OrderSerializer(data=request.data)
+        serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -109,12 +109,12 @@ class OrderDetail(APIView):
 
     def get(self, request, id):
         order = self.get_order(id)
-        serializer = serializers.OrderSerializer(order)
+        serializer = OrderSerializer(order)
         return Response(serializer.data)
 
     def put(self, request, id):
         order = self.get_order(id)
-        serializer = serializers.OrderUpdateSerializer(order, data=request.data)
+        serializer = OrderUpdateSerializer(order, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
