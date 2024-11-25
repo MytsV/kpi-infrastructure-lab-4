@@ -24,8 +24,9 @@ class Product(models.Model):
 
 
 class Order(models.Model):
+    id = models.AutoField(primary_key=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.client} - {self.product}"
+        return f"Product ID: {self.product}, Client ID: {self.client}"

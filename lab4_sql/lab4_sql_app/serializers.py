@@ -31,7 +31,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['client', 'product']
+        fields = ['id', 'client', 'product']
 
 
 class OrderUpdateSerializer(serializers.ModelSerializer):

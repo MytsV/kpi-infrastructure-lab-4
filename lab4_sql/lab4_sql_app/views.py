@@ -6,7 +6,9 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Product, Order, Client
-from .serializers import ClientSerializer, ClientUpdateSerializer, ProductSerializer, ProductUpdateSerializer, OrderSerializer, OrderUpdateSerializer
+from .serializers import ClientSerializer, ClientUpdateSerializer, ProductSerializer, ProductUpdateSerializer, \
+    OrderSerializer, OrderUpdateSerializer
+
 
 # Create your views here.
 class ClientList(APIView):
@@ -21,6 +23,7 @@ class ClientList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ClientDetail(APIView):
     def get_client(self, id):
@@ -48,6 +51,7 @@ class ClientDetail(APIView):
         client.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class ProductList(APIView):
     def get(self, request):
         products = Product.objects.all()
@@ -60,6 +64,7 @@ class ProductList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProductDetail(APIView):
     def get_product(self, id):
@@ -87,6 +92,7 @@ class ProductDetail(APIView):
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class OrderList(APIView):
     def get(self, request):
         orders = Order.objects.all()
@@ -99,6 +105,7 @@ class OrderList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class OrderDetail(APIView):
     def get_order(self, id):
