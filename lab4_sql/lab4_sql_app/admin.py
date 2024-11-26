@@ -8,9 +8,9 @@ class ClientAdmin(admin.ModelAdmin):
     list_filter = ('gender',)
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('client', 'product')
-    search_fields = ('client__name', 'product__type')
-    list_filter = ('client', 'product')
+    list_display = ('client_id', 'product_id')
+    search_fields = ('client_id', 'product_id')
+    list_filter = ('client_id', 'product_id')
 
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Product)
