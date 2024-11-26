@@ -1,7 +1,7 @@
 services:
   mongo_db:
     image: mongo:latest
-    container_name: mongo
+    container_name: mongo_db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
@@ -13,15 +13,17 @@ services:
 
   nosql_app:
     build: ./lab4_nosql
+    volumes:
+      - ./lab4_nosql:/app
     container_name: nosql
     environment:
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DJANGO_DEBUG=${DJANGO_DEBUG}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
+      - DJANGO_SECRET_KEY=${NOSQL_DJANGO_SECRET_KEY}
+      - DJANGO_DEBUG=${NOSQL_DJANGO_DEBUG}
+      - DB_NAME=${NOSQL_DB_NAME}
+      - DB_USER=${NOSQL_DB_USER}
+      - DB_PASSWORD=${NOSQL_DB_PASSWORD}
+      - DB_HOST=${NOSQL_DB_HOST}
+      - DB_PORT=${NOSQL_DB_PORT}
     ports:
       - "8001:8000"
     depends_on:
@@ -30,11 +32,11 @@ services:
 
   sql_db:
     image: postgres
-    container_name: postgres_db
+    container_name: sql_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: lab4_sql
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 2s
@@ -58,7 +60,13 @@ services:
       sql_db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/lab4_sql
+      - DJANGO_SECRET_KEY=${SQL_DJANGO_SECRET_KEY}
+      - DJANGO_DEBUG=${SQL_DJANGO_DEBUG}
+      - DB_NAME=${SQL_DB_NAME}
+      - DB_USER=${SQL_DB_USER}
+      - DB_PASSWORD=${SQL_DB_PASSWORD}
+      - DB_HOST=${SQL_DB_HOST}
+      - DB_PORT=${SQL_DB_PORT}
 
 volumes:
   postgres_data:
