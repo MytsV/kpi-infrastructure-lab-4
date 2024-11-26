@@ -1,7 +1,4 @@
-import uuid
-
 from django.http import Http404
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -28,30 +25,28 @@ class SalespersonList(APIView):
 
 
 class SalespersonDetail(APIView):
-    def get_salesperson(self, code):
+    def get_salesperson(self, salesperson_id):
         try:
-            # code_uuid = uuid.UUID(code)
-            return Salesperson.objects.get(code=code)
+            return Salesperson.objects.get(id=salesperson_id)
         except Salesperson.DoesNotExist:
             raise Http404
 
-    def get(self, request, code):
-        salesperson = self.get_salesperson(code)
+    def get(self, request, salesperson_id):
+        salesperson = self.get_salesperson(salesperson_id)
         serializer = SalespersonSerializer(salesperson)
         return Response(serializer.data)
 
-    def put(self, request, code):
-        salesperson = self.get_salesperson(code)
+    def put(self, request, salesperson_id):
+        salesperson = self.get_salesperson(salesperson_id)
 
-        serializer = SalespersonUpdateSerializer(salesperson, data=request.data)
+        serializer = SalespersonUpdateSerializer(salesperson, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @csrf_exempt
-    def delete(self, request, code):
-        salesperson = self.get_salesperson(code)
+    def delete(self, request, salesperson_id):
+        salesperson = self.get_salesperson(salesperson_id)
         salesperson.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
