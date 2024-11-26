@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "lab4_sql_app",
     "django.contrib.postgres",
+    "django_filters"
 ]
 
 MIDDLEWARE = [

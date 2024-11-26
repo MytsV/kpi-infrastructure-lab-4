@@ -14,6 +14,11 @@ from .serializers import ClientSerializer, ClientUpdateSerializer, ProductSerial
 class ClientList(APIView):
     def get(self, request):
         clients = Client.objects.all()
+
+        age_gte = request.query_params.get('age_gte', None)
+        if age_gte is not None:
+            clients = clients.filter(age__gte=age_gte)
+
         serializer = ClientSerializer(clients, many=True)
         return Response(serializer.data)
 
@@ -96,6 +101,15 @@ class ProductDetail(APIView):
 class OrderList(APIView):
     def get(self, request):
         orders = Order.objects.all()
+
+        client_id = request.query_params.get('client_id', None)
+        if client_id is not None:
+            orders = orders.filter(client_id=client_id)
+
+        product_id = request.query_params.get('product_id', None)
+        if product_id is not None:
+            orders = orders.filter(product_id=product_id)
+
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
