@@ -33,6 +33,11 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'client', 'product']
 
+    def to_representation(self, instance):
+        self.fields['client'] = ClientSerializer(read_only=True)
+        self.fields['product'] = ProductSerializer(read_only=True)
+        return super().to_representation(instance)
+
 
 class OrderUpdateSerializer(serializers.ModelSerializer):
     class Meta:
