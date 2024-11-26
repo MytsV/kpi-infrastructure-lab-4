@@ -18,6 +18,9 @@ class ClientUpdateSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
+        extra_kwargs = {
+            'price': {'min_value': 0.00}
+        }
         fields = ['id', 'type', 'price']
 
 
@@ -25,6 +28,9 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         # Only allow these fields to be updated
+        extra_kwargs = {
+            'price': {'min_value': 0.00}
+        }
         fields = ['type', 'price']
 
 
