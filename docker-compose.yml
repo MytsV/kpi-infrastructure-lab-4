@@ -10,6 +10,11 @@ services:
       - mongo_data:/data/db
     ports:
       - "27018:27017"
+    healthcheck:
+      test: [ "CMD","mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
 
   nosql_app:
     build: ./lab4_nosql
@@ -27,7 +32,8 @@ services:
     ports:
       - "8001:8000"
     depends_on:
-      - mongo_db
+      mongo_db:
+         condition: service_healthy
     command: python manage.py runserver 0.0.0.0:8000
 
   sql_db:
