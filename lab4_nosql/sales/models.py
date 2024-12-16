@@ -1,3 +1,6 @@
+import os
+import uuid
+
 import magic
 from django.core.validators import RegexValidator, FileExtensionValidator
 from django.db import models
@@ -6,6 +9,12 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 
 from django.core.exceptions import ValidationError
+
+
+def generate_unique_image_filename(instance, filename):
+    extension = filename.split('.')[-1]
+    unique_filename = f"{uuid.uuid4().hex}.{extension}"
+    return os.path.join('images/', unique_filename)
 
 
 def validate_image_mime_type(image):
@@ -24,7 +33,7 @@ class Salesperson(models.Model):
 
     full_name = models.CharField(max_length=100)
 
-    picture = models.ImageField(upload_to='images/', blank=True, validators=[
+    picture = models.ImageField(upload_to=generate_unique_image_filename, blank=True, validators=[
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif']),
         validate_image_mime_type,
     ])
