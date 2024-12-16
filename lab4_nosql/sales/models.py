@@ -1,8 +1,22 @@
-from django.core.validators import RegexValidator
+import magic
+from django.core.validators import RegexValidator, FileExtensionValidator
 from django.db import models
 
 from django.utils.safestring import mark_safe
 from django.conf import settings
+
+from django.core.exceptions import ValidationError
+
+
+def validate_image_mime_type(image):
+    mime = magic.Magic(mime=True)
+    mime_type = mime.from_buffer(image.read())
+
+    allowed_mime_types = ['image/jpeg', 'image/png', 'image/gif']
+    if mime_type not in allowed_mime_types:
+        raise ValidationError(f"Invalid image format. Allowed formats: JPEG, PNG, GIF. Your file is {mime_type}.")
+
+    image.seek(0)
 
 
 class Salesperson(models.Model):
@@ -10,7 +24,10 @@ class Salesperson(models.Model):
 
     full_name = models.CharField(max_length=100)
 
-    picture = models.ImageField(upload_to='images/', blank=True)
+    picture = models.ImageField(upload_to='images/', blank=True, validators=[
+        FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif']),
+        validate_image_mime_type,
+    ])
 
     age = models.PositiveIntegerField()
 
