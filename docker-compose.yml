@@ -10,16 +10,12 @@ services:
       - mongo_data:/data/db
     ports:
       - "27018:27017"
-    healthcheck:
-      test: [ "CMD","mongosh", "--eval", "db.adminCommand('ping')" ]
-      interval: 5s
-      timeout: 5s
-      retries: 3
 
   nosql_app:
     build: ./lab4_nosql
     volumes:
       - ./lab4_nosql:/app
+      - nosql_media:/app/media
     container_name: nosql
     environment:
       - DJANGO_SECRET_KEY=${NOSQL_DJANGO_SECRET_KEY}
@@ -32,8 +28,7 @@ services:
     ports:
       - "8001:8000"
     depends_on:
-      mongo_db:
-         condition: service_healthy
+      - mongo_db
     command: python manage.py runserver 0.0.0.0:8000
 
   sql_db:
@@ -77,3 +72,4 @@ services:
 volumes:
   postgres_data:
   mongo_data:
+  nosql_media:
