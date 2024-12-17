@@ -5,29 +5,9 @@ import base64
 
 class ClientSerializer(serializers.ModelSerializer):
 
-    photo_small_base64 = serializers.SerializerMethodField()
-    photo_medium_base64 = serializers.SerializerMethodField()
-    photo_large_base64 = serializers.SerializerMethodField()
-
     class Meta:
         model = Client
-        fields = ['id', 'name', 'age', 'gender', 'type', 'price', 'photo_small_base64', 'photo_medium_base64',
-                  'photo_large_base64']
-    
-    def get_photo_small_base64(self, obj):
-        if obj.photo_small:
-            return bytes(obj.photo_small).decode('latin1')
-        return None
-    
-    def get_photo_medium_base64(self, obj):
-        if obj.photo_medium:
-            return bytes(obj.photo_medium).decode('latin1')
-        return None
-
-    def get_photo_large_base64(self, obj):
-        if obj.photo_large:
-            return bytes(obj.photo_large).decode('latin1')
-        return None
+        fields = ['id', 'name', 'age', 'gender', 'type', 'price']
 
 
 class ClientUpdateSerializer(serializers.ModelSerializer):

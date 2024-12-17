@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from .models import Product, Order, Client
 from .serializers import ClientSerializer, ClientUpdateSerializer, ProductSerializer, ProductUpdateSerializer, \
     OrderSerializer, OrderUpdateSerializer
+from django.shortcuts import get_object_or_404
+import base64
 
 
 # Create your views here.
@@ -56,6 +58,18 @@ class ClientDetail(APIView):
         client.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class ClientImageView(APIView):
+    def get(self, request, id, size):
+        client = get_object_or_404(Client, id=id)
+        if size not in ['small', 'medium', 'large']:
+            return Response({'error': 'Invalid image size.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        photo_field = getattr(client, f'photo_{size}', None)
+        if photo_field:
+            image_data = bytes(photo_field).decode('latin1')
+            return Response({'image': image_data}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Image not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 class ProductList(APIView):
     def get(self, request):
