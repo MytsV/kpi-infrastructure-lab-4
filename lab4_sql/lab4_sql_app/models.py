@@ -1,5 +1,9 @@
 from django.db import models
 from django.utils.html import format_html
+from PIL import Image
+import io
+import base64
+from PIL import ImageSequence
 
 
 # Create your models here.
@@ -10,16 +14,56 @@ class Client(models.Model):
     gender = models.CharField(max_length=10)
     type = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    photo = models.BinaryField(null=True, blank=True)
+    photo_small = models.BinaryField(null=True, blank=True)
+    photo_medium = models.BinaryField(null=True, blank=True)
+    photo_large = models.BinaryField(null=True, blank=True)
 
     def __str__(self):
         return self.name
     
+    def save(self, *args, **kwargs):
+        if hasattr(self, '_uploaded_photo') and self._uploaded_photo:
+            image = Image.open(self._uploaded_photo)
+
+            sizes = {
+                "small": (150, 150),
+                "medium": (450, 450),
+                "large": (900, 900),
+            }
+
+            if image.format == 'GIF':
+                for size_name, size in sizes.items():
+                    output = io.BytesIO()
+                    frames = []
+                    for frame in ImageSequence.Iterator(image):
+                        frame = frame.convert("RGBA")
+                        frame.thumbnail(size, Image.LANCZOS)
+                        frames.append(frame)
+
+                    frames[0].save(
+                        output,
+                        format='GIF',
+                        save_all=True,
+                        append_images=frames[1:],
+                        optimize=True
+                    )
+                    setattr(self, f"photo_{size_name}", base64.b64encode(output.getvalue()))
+            else:
+                for size_name, size in sizes.items():
+                    output = io.BytesIO()
+                    img = image.copy()
+                    img.thumbnail(size, Image.LANCZOS)
+                    image_format = 'JPEG' if image.format in ['JPEG', 'JPG'] else 'PNG'
+                    img.save(output, format=image_format, optimize=True)
+                    setattr(self, f"photo_{size_name}", base64.b64encode(output.getvalue()))
+
+        super().save(*args, **kwargs)
+    
     def image_preview(self):
-        if self.photo:
+        if self.photo_medium:
             return format_html(
-                '<img src="data:image/jpeg;base64,{}" width="100" height="100" style="object-fit: cover;"/>',
-                bytes(self.photo).decode('latin1')
+                '<img src="data:image/jpeg;base64,{}" width="100" height="100" style="object-fit: scale-down;"/>',
+                bytes(self.photo_medium).decode('latin1')
             )
         return "No image"
     image_preview.short_description = "Photo Preview"

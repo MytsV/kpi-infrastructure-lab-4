@@ -24,8 +24,7 @@ class ClientForm(forms.ModelForm):
         instance = super().save(commit=False)
         photo = self.cleaned_data.get('upload_photo')
         if photo:
-            # Save the uploaded photo as binary data
-            instance.photo = base64.b64encode(photo.read())
+            instance._uploaded_photo = photo
         if commit:
             instance.save()
         return instance
