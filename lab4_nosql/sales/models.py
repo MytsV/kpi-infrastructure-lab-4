@@ -9,6 +9,7 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 
 from django.core.exceptions import ValidationError
+from django_resized import ResizedImageField
 
 
 def generate_unique_image_filename(instance, filename):
@@ -33,7 +34,7 @@ class Salesperson(models.Model):
 
     full_name = models.CharField(max_length=100)
 
-    picture = models.ImageField(upload_to=generate_unique_image_filename, blank=True, validators=[
+    picture = ResizedImageField(size=[800, 800], quality=75, upload_to=generate_unique_image_filename, blank=True, validators=[
         FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif']),
         validate_image_mime_type,
     ])
