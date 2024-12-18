@@ -47,7 +47,7 @@ class Client(models.Model):
                         append_images=frames[1:],
                         optimize=True
                     )
-                    setattr(self, f"photo_{size_name}", base64.b64encode(output.getvalue()))
+                    setattr(self, f"photo_{size_name}", output.getvalue())
             else:
                 for size_name, size in sizes.items():
                     output = io.BytesIO()
@@ -55,18 +55,25 @@ class Client(models.Model):
                     img.thumbnail(size, Image.LANCZOS)
                     image_format = 'JPEG' if image.format in ['JPEG', 'JPG'] else 'PNG'
                     img.save(output, format=image_format, optimize=True)
-                    setattr(self, f"photo_{size_name}", base64.b64encode(output.getvalue()))
+                    setattr(self, f"photo_{size_name}", output.getvalue())
 
         super().save(*args, **kwargs)
     
+
     def image_preview(self):
         if self.photo_medium:
             return format_html(
                 '<img src="data:image/jpeg;base64,{}" width="100" height="100" style="object-fit: scale-down;"/>',
-                bytes(self.photo_medium).decode('latin1')
+                base64.b64encode(self.photo_medium).decode('utf-8')
             )
         return "No image"
     image_preview.short_description = "Photo Preview"
+
+    def delete_images(self):
+        self.photo_small = None
+        self.photo_medium = None
+        self.photo_large = None
+        self.save()
 
 
 class Product(models.Model):

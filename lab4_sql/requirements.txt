@@ -4,3 +4,4 @@ python-decouple==3.8
 djangorestframework==3.14.0
 django-filter==24.3
 pillow==11.0.0
+python-magic==0.4.27
