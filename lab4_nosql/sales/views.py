@@ -1,9 +1,11 @@
 from django.http import Http404
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Salesperson
 from .serializers import SalespersonSerializer, SalespersonUpdateSerializer
+
 
 class SalespersonList(APIView):
     def get(self, request):
@@ -25,6 +27,8 @@ class SalespersonList(APIView):
 
 
 class SalespersonDetail(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
     def get_salesperson(self, salesperson_id):
         try:
             return Salesperson.objects.get(id=salesperson_id)
