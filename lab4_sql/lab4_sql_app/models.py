@@ -58,13 +58,18 @@ class Client(models.Model):
                     setattr(self, f"photo_{size_name}", output.getvalue())
 
         super().save(*args, **kwargs)
-    
 
     def image_preview(self):
         if self.photo_medium:
             return format_html(
-                '<img src="data:image/jpeg;base64,{}" width="100" height="100" style="object-fit: scale-down;"/>',
-                base64.b64encode(self.photo_medium).decode('utf-8')
+                '<img src="/api/clients/{}/image/{}/" '
+                'srcset="/api/clients/{}/image/small/ 300w, '
+                '/api/clients/{}/image/medium/ 600w, '
+                '/api/clients/{}/image/large/ 1200w" '
+                'sizes="(max-width: 600px) 300px, (max-width: 1200px) 600px, 1200px" '
+                'width="100" height="100" style="object-fit: scale-down;"/>',
+                self.id, 'medium',
+                self.id, self.id, self.id
             )
         return "No image"
     image_preview.short_description = "Photo Preview"
