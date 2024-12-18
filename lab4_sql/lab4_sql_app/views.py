@@ -6,8 +6,12 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Product, Order, Client
-from .serializers import ClientSerializer, ClientUpdateSerializer, ProductSerializer, ProductUpdateSerializer, \
+from .serializers import ClientSerializer, ProductSerializer, ProductUpdateSerializer, \
     OrderSerializer, OrderUpdateSerializer
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+import magic
+from rest_framework.parsers import FormParser, MultiPartParser
 
 
 # Create your views here.
@@ -43,8 +47,8 @@ class ClientDetail(APIView):
         return Response(serializer.data)
 
     def put(self, request, id):
-        client = self.get_client(id)
-        serializer = ClientUpdateSerializer(client, data=request.data)
+        client = get_object_or_404(Client, id=id)
+        serializer = ClientSerializer(client, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -56,6 +60,26 @@ class ClientDetail(APIView):
         client.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class ClientImageView(APIView):
+    def get(self, request, id, size):
+        client = get_object_or_404(Client, id=id)
+        if size not in ['small', 'medium', 'large']:
+            return Response({'error': 'Invalid image size.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        photo_field = getattr(client, f'photo_{size}', None)
+        if photo_field:
+            image_data = bytes(photo_field)
+            mime = magic.Magic(mime=True)
+            content_type = mime.from_buffer(image_data)
+            return HttpResponse(image_data, content_type=content_type)
+        else:
+            return Response({'error': 'Image not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+class ClientPhotoDeleteView(APIView):
+    def delete(self, request, id):
+        client = get_object_or_404(Client, id=id)
+        client.delete_images()
+        return Response({'message': 'Photos deleted successfully.'}, status=status.HTTP_200_OK)
 
 class ProductList(APIView):
     def get(self, request):

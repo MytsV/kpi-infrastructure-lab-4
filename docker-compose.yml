@@ -57,7 +57,7 @@ services:
     build:
       context: lab4_sql
     container_name: sql_app
-    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./lab4_sql:/usr/src/lab4_sql
     ports:
