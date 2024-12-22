@@ -16,11 +16,9 @@ class ClientForm(forms.ModelForm):
     def clean_upload_photo(self):
         photo = self.cleaned_data.get('upload_photo')
         if photo:
-            mime = magic.from_buffer(photo.read(2048), mime=True)
             allowed_types = ['image/jpeg', 'image/png', 'image/gif']
-            if mime not in allowed_types:
+            if photo.content_type not in allowed_types:
                 raise ValidationError("Only JPEG, PNG, and GIF files are allowed.")
-            photo.seek(0)
         return photo
 
     def save(self, commit=True):

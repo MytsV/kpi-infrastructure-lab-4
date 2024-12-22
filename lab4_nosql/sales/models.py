@@ -11,6 +11,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django_resized import ResizedImageField
 
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
 
 def generate_unique_image_filename(instance, filename):
     extension = filename.split('.')[-1]
@@ -27,7 +30,6 @@ def validate_image_mime_type(image):
         raise ValidationError(f"Invalid image format. Allowed formats: JPEG, PNG, GIF. Your file is {mime_type}.")
 
     image.seek(0)
-
 
 class Salesperson(models.Model):
     id = models.AutoField(primary_key=True)
@@ -59,6 +61,30 @@ class Salesperson(models.Model):
             return mark_safe('<img src="%s%s" width="150" height="150" />' % (settings.MEDIA_URL, self.picture))
         else:
             return mark_safe('<span>No picture available</span>')
+        
+    def save(self, *args, **kwargs):
+        if self.id:
+            try:
+                old_instance = Salesperson.objects.get(id=self.id)
+                old_image = old_instance.picture
+            except Salesperson.DoesNotExist:
+                old_image = None
+
+            if old_image:
+                if self.picture and old_image != self.picture:
+                    if os.path.isfile(old_image.path):
+                        os.remove(old_image.path)
+                
+                elif not self.picture:
+                    if os.path.isfile(old_image.path):
+                        os.remove(old_image.path)
+                    self.picture = None
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.picture and os.path.isfile(self.picture.path):
+            os.remove(self.picture.path)
+        super(Salesperson, self).delete(*args, **kwargs)
 
     def __str__(self):
         return f"{self.full_name} ({self.id})"
