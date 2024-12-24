@@ -1,4 +1,32 @@
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    user: rabbitmq
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+  send_email_service:
+    build:
+      context: ./send_email_service
+    container_name: send_email_service
+    depends_on:
+      rabbitmq: 
+        condition: service_healthy
+    environment:
+      - RABBITMQ_EMAIL_QUEUE=${RABBITMQ_EMAIL_QUEUE}
+
   mongo_db:
     image: mongo:latest
     container_name: mongo_db
@@ -57,13 +85,15 @@ services:
     build:
       context: lab4_sql
     container_name: sql_app
-    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./lab4_sql:/usr/src/lab4_sql
     ports:
       - "8000:8000"
     depends_on:
       sql_db:
+        condition: service_healthy
+      rabbitmq: 
         condition: service_healthy
     environment:
       - DJANGO_SECRET_KEY=${SQL_DJANGO_SECRET_KEY}
@@ -73,7 +103,14 @@ services:
       - DB_PASSWORD=${SQL_DB_PASSWORD}
       - DB_HOST=${SQL_DB_HOST}
       - DB_PORT=${SQL_DB_PORT}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_EMAIL_QUEUE=${RABBITMQ_EMAIL_QUEUE}
+      - PYTHONUNBUFFERED=0
 
 volumes:
   postgres_data:
   mongo_data:
+  rabbitmq_data:

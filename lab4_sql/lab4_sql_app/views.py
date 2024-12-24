@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from .models import Product, Order, Client
 from .serializers import ClientSerializer, ClientUpdateSerializer, ProductSerializer, ProductUpdateSerializer, \
     OrderSerializer, OrderUpdateSerializer
+from django.conf import settings
+from .utils.rabbitmq import send_message
 
 
 # Create your views here.
@@ -25,7 +27,11 @@ class ClientList(APIView):
     def post(self, request):
         serializer = ClientSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            client = serializer.save()
+            send_message(settings.RABBITMQ['EMAIL_QUEUE'], {
+                "email": client.email,
+                "message": "Welcome to our platform!"
+            })
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -47,6 +53,10 @@ class ClientDetail(APIView):
         serializer = ClientUpdateSerializer(client, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            send_message(settings.RABBITMQ['EMAIL_QUEUE'], {
+                "email": request.data['email'],
+                "message": "Your data was successfully updated!"
+            })
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -54,6 +64,10 @@ class ClientDetail(APIView):
     def delete(self, request, id):
         client = self.get_client(id)
         client.delete()
+        send_message(settings.RABBITMQ['EMAIL_QUEUE'], {
+            "email": client.email,
+            "message": "Your data was successfully deleted!"
+        })
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

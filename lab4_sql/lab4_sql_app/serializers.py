@@ -5,14 +5,14 @@ from .models import Client, Product, Order
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ['id', 'name', 'age', 'gender', 'type', 'price']
+        fields = ['id', 'name', 'age', 'gender', 'type', 'price', 'email']
 
 
 class ClientUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         # Only allow these fields to be updated
-        fields = ['name', 'age', 'gender', 'type', 'price']
+        fields = ['name', 'age', 'gender', 'type', 'price', 'email']
 
 
 class ProductSerializer(serializers.ModelSerializer):
