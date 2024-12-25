@@ -1,4 +1,3 @@
-# utils/rabbitmq.py
 from django.conf import settings
 import pika
 import json
@@ -23,7 +22,9 @@ def send_message(queue, message):
 
         channel = connection.channel()
         channel.queue_declare(queue=queue, durable=True)
-        channel.basic_publish(exchange='', routing_key=queue, body=json.dumps(message))
+        channel.basic_publish(exchange='', routing_key=queue, body=json.dumps(message), properties=pika.BasicProperties(
+            delivery_mode=2
+        ))
         print(f"Message sent to {queue}", flush=True)
         connection.close()
     except Exception as e:

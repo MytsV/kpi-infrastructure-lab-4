@@ -50,11 +50,11 @@ class ClientDetail(APIView):
 
     def put(self, request, id):
         client = self.get_client(id)
-        serializer = ClientUpdateSerializer(client, data=request.data)
+        serializer = ClientUpdateSerializer(client, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             send_message(settings.RABBITMQ['EMAIL_QUEUE'], {
-                "email": request.data['email'],
+                "email": client.email,
                 "message": "Your data was successfully updated!"
             })
             return Response(serializer.data)

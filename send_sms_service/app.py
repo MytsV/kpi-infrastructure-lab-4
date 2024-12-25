@@ -1,13 +1,19 @@
+import logging
 import pika
 import json
 from decouple import config
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def callback(ch, method, properties, body):
     message = json.loads(body)
-    # Append logs file
-    with open('logs.txt', 'a') as file:
-        file.write(f"Sent email to {message['email']}: {message['message']}\n")
+    phone_number = message['phone_number']
+    if phone_number is None:
+        logger.warning("Can't send SMS to an entity without a phone_number")
+    else:
+        logger.info(f"Sent an SMS to {phone_number} with text: {message['message']}")
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
@@ -27,9 +33,9 @@ def main():
         )
     )
     channel = connection.channel()
-    channel.queue_declare(queue=config('RABBITMQ_EMAIL_QUEUE'), durable=True)
-    channel.basic_consume(queue=config('RABBITMQ_EMAIL_QUEUE'), on_message_callback=callback)
-    print("Waiting for SMS messages. To exit, press CTRL+C")
+    logger.info("Established connection with RabbitMQ.")
+    channel.queue_declare(queue=config('RABBITMQ_SMS_QUEUE'), durable=True)
+    channel.basic_consume(queue=config('RABBITMQ_SMS_QUEUE'), on_message_callback=callback)
     channel.start_consuming()
 
 

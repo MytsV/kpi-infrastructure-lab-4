@@ -140,3 +140,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [],
 }
+
+RABBITMQ = {
+    'HOST': config('RABBITMQ_HOST'),
+    'PORT': int(config('RABBITMQ_PORT')),
+    'USER': config('RABBITMQ_USER'),
+    'PASSWORD': config('RABBITMQ_PASSWORD'),
+    'SMS_QUEUE': config('RABBITMQ_SMS_QUEUE'),
+}

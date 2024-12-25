@@ -22,10 +22,28 @@ services:
       context: ./send_email_service
     container_name: send_email_service
     depends_on:
-      rabbitmq: 
+      rabbitmq:
         condition: service_healthy
     environment:
       - RABBITMQ_EMAIL_QUEUE=${RABBITMQ_EMAIL_QUEUE}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
+  send_sms_service:
+    build:
+      context: ./send_sms_service
+    container_name: send_sms_service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_SMS_QUEUE=${RABBITMQ_SMS_QUEUE}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
 
   mongo_db:
     image: mongo:latest
@@ -57,6 +75,11 @@ services:
       - DB_PASSWORD=${NOSQL_DB_PASSWORD}
       - DB_HOST=${NOSQL_DB_HOST}
       - DB_PORT=${NOSQL_DB_PORT}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_SMS_QUEUE=${RABBITMQ_SMS_QUEUE}
     ports:
       - "8001:8000"
     depends_on:
